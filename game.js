@@ -10,6 +10,7 @@ class Plane {
     this.image = image
     this.price = price
     this.pax = pax
+    this.qty = 0
   }
 
   get clickerHtml() {
@@ -34,16 +35,81 @@ class Plane {
           </div>
         </div>
         <div class="col-4 p-0">
-          <button class="btn btn-primary" onclick="control.buy('${buyId}')">
+          <button class="btn btn-primary" onclick="control.buyPlane('${buyId}')">
             ${this.price}
             <i class="mdi mdi-ticket"></i>
           </button>
         </div>
       </div>`
   }
+
+  get clicks() {
+    return this.qty * this.pax
+  }
 }
 
-let planes = {
+class Service {
+  click() {
+    for (const p in planes) {
+      clicks += planes[p].clicks
+    }
+    control.draw()
+  }
+}
+
+class Controller {
+  constructor() {
+    this.draw()
+  }
+
+  click() {
+    service.click()
+  }
+
+  reset() {
+    for (const p in planes) {
+      planes[p].qty = 0
+    }
+    clicks = 0
+    bestPlane = starterPlane
+    planes[starterPlane].qty = 1
+    this.draw()
+  }
+
+
+
+  buyPlane(id) {
+    if (clicks >= planes[id].price) {
+      clicks -= planes[id].price
+      planes[id].qty++
+    }
+
+    // this should go elsewhere - find new best aircraft
+    for (const p in planes) {
+      if (planes[p].qty > 0 && planes[p].pax > planes[bestPlane].pax) {
+        bestPlane = p
+      }
+    }
+
+    this.draw()
+  }
+
+  getShopHtml() {
+    let html = ''
+    for (const p in planes) {
+      html += planes[p].shopHtml(p)
+    }
+    return html
+  }
+
+  draw() {
+    document.getElementById('clicker-card').innerHTML = planes[bestPlane].clickerHtml
+    document.getElementById('shop-card').innerHTML = this.getShopHtml()
+    document.getElementById('pax-total').innerText = clicks
+  }
+}
+
+let planes =  {
   c150: new Plane(
     'The Tin Can',
     'img/c150.jpg',
@@ -99,27 +165,25 @@ let planes = {
     2000000
   ),
   mriya: new Plane(
-    'Big Chungus',
+    'The Big Chungus',
     'img/mriya.jpg',
     500000000,
     10000000
   ),
   concorde: new Plane(
-    'The Leadfoot',
+    'The Droop Snoot',
     'img/concorde.jpg',
     2000000000,
     50000000
-  )
-}
-
-function draw() {
-  document.getElementById('clicker-card').innerHTML = planes.comet.clickerHtml
-  
-  let shophtml = ``
-  for (const p in planes) {
-    shophtml += planes[p].shopHtml(p)
+    )
   }
-  document.getElementById('shop-card').innerHTML = shophtml
-}
-
-draw()
+  
+  const starterPlane = 'c150'
+  let bestPlane = starterPlane
+  let clicks = 0
+  planes[starterPlane].qty = 1
+  
+  let service = new Service
+  let control = new Controller
+  
+  control.draw()
