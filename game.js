@@ -1,16 +1,3 @@
-// planes
-// C-150         1  10
-// Bonanza       5  100
-// dc-3         10  1k
-// comet        50  10k
-// q400        100  100k
-// a220        500  1m
-// 737max       1k  5m
-// 787         10k  10m
-// 747         50k  50m
-// an225      100k  100m
-// concorde   500k  500m
-
 // planes increase pax/click
 // pilots increase clicks/s
 // cfi increase pilots/min
@@ -24,6 +11,36 @@ class Plane {
     this.price = price
     this.pax = pax
   }
+
+  get clickerHtml() {
+    return `
+      <img src="${this.image}" alt="${this.name}" class="card-img">
+      <div class="card-body">
+        <h2 class="card-title">${this.name}</h2>
+      </div>`
+  }
+
+  shopHtml(buyId) {
+    return `
+      <div class="border-top py-3 row">
+        <div class="col-8 p-0">
+          <div class="d-flex flex-column">
+            <h4>${this.name}</h4>
+            <p class="mb-0">
+              ${this.pax}
+              <i class="mdi mdi-ticket"></i>
+              per Click
+            </p>
+          </div>
+        </div>
+        <div class="col-4 p-0">
+          <button class="btn btn-primary" onclick="control.buy('${buyId}')">
+            ${this.price}
+            <i class="mdi mdi-ticket"></i>
+          </button>
+        </div>
+      </div>`
+  }
 }
 
 let planes = {
@@ -34,7 +51,7 @@ let planes = {
     1
   ),
   bonanza: new Plane(
-    'The Developer Killer',
+    'The Doctor Killer',
     'bonanza.jpg',
     100,
     5
@@ -95,3 +112,14 @@ let planes = {
   )
 }
 
+function draw() {
+  document.getElementById('clicker-card').innerHTML = planes.comet.clickerHtml
+  
+  let shophtml = ``
+  for (const p in planes) {
+    shophtml += planes[p].shopHtml(p)
+  }
+  document.getElementById('shop-card').innerHTML = shophtml
+}
+
+draw()

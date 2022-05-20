@@ -1,0 +1,18 @@
+nav {
+  min-height: 6vh;
+}
+
+main {
+  min-height: 90vh;
+}
+
+footer {
+  min-height: 4vh;
+  background-color: black;
+  color: white;
+}
+
+.btn {
+  height: 100%;
+  width: 100%;
+}
