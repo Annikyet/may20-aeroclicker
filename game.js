@@ -11,6 +11,7 @@ class Plane {
   constructor(name, image, price, pax) {
     this.name = name
     this.image = image
+    this.initialPrice = price
     this.price = price
     this.pax = pax
     this.qty = 0
@@ -40,7 +41,7 @@ class Plane {
         <div class="col-4 p-0">
           <div class="d-flex flex-column">
             <h5>(x${service.formatNum(this.qty)})</h5>
-            <button class="btn btn-primary" onclick="control.buyPlane('${buyId}')">
+            <button class="btn btn-primary" onclick="control.buyPlane('${buyId}')"${this.price <= clicks ? "" : " disabled"}>
               ${service.formatNum(this.price)}
               <i class="mdi mdi-ticket"></i>
             </button>
@@ -55,116 +56,17 @@ class Plane {
   }
 }
 
-class Service {
-  click() {
-    for (const p in planes) {
-      clicks += planes[p].clicks
-    }
-    control.draw()
-  }
-
-  reset() {
-
-  }
-
-  findBestPlane() {
-
-  }
-
-  buyPlane(id) {
-
-  }
-
-  buyPilot(id) {
-
-  }
-
-  formatNum(num) {
-    if (num < 1000) {
-      return num
-    }
-    else if (num < 1000000) {
-      return Math.floor(num / 1000) + 'k'
-    }
-    else if (num < 1000000000) {
-      return Math.floor(num / 1000000) + 'M'
-    }
-    else {
-      return Math.floor(num / 1000000000) + 'G'
-    }
-  }
-}
-
-class Controller {
-  constructor() {
-    this.draw()
-  }
-
-  click() {
-    service.click()
-  }
-
-  reset() {
-    for (const p in planes) {
-      planes[p].qty = 0
-    }
-    clicks = 0
-    pilots.qty = 0
-    bestPlane = starterPlane
-    planes[starterPlane].qty = 1
-    this.draw()
-  }
-
-  buyPilot() {
-    if (clicks >= pilots.price) {
-      clicks -= pilots.price
-      pilots.qty++
-      control.draw()
-    }
-  }
-
-  buyPlane(id) {
-    if (clicks >= planes[id].price) {
-      clicks -= planes[id].price
-      planes[id].qty++
-    }
-
-    // this should go elsewhere - find new best aircraft
-    for (const p in planes) {
-      if (planes[p].qty > 0 && planes[p].pax > planes[bestPlane].pax) {
-        bestPlane = p
-      }
-    }
-
-    this.draw()
-  }
-
-  getShopHtml() {
-    let html = ''
-    for (const p in planes) {
-      html += planes[p].shopHtml(p)
-    }
-    return html
-  }
-
-  draw() {
-    document.getElementById('clicker-card').innerHTML = planes[bestPlane].clickerHtml
-    document.getElementById('pilot-card').innerHTML = pilots.html
-    document.getElementById('shop-card').innerHTML = this.getShopHtml()
-    document.getElementById('pax-total').innerText = clicks
-  }
-}
-
 class Pilot {
   constructor() {
     this.qty = 0
+    this.initialPrice = 500
     this.price = 500
   }
 
   get html() {
     return `
     <h5>(x${service.formatNum(this.qty)})</h5>
-    <button class="btn btn-primary" onclick="control.buyPilot()">
+    <button class="btn btn-primary" onclick="control.buyPilot()"${this.price <= clicks ? "" : " disabled"}>
       ${service.formatNum(this.price)}
       <i class="mdi mdi-ticket"></i>
     </button>
@@ -239,13 +141,116 @@ let planes =  {
     2000000000,
     50000000
     )
-  }
-  
+}
 const starterPlane = 'c150'
+const pilotPriceHike = 2
+const planePriceHike = 1.2
 let bestPlane = starterPlane
 let clicks = 0
 planes[starterPlane].qty = 1
 let pilots = new Pilot
+
+class Service {
+
+  click() {
+    for (const p in planes) {
+      clicks += planes[p].clicks
+    }
+    control.draw()
+  }
+
+  reset() {
+    for (const p in planes) {
+      planes[p].qty = 0
+      planes[p].price = planes[p].initialPrice
+    }
+    clicks = 0
+    pilots.qty = 0
+    pilots.price = pilots.initialPrice
+    bestPlane = starterPlane
+    planes[starterPlane].qty = 1
+    control.draw()
+  }
+
+  findBestPlane() {
+    for (const p in planes) {
+      if (planes[p].qty > 0 && planes[p].pax > planes[bestPlane].pax) {
+        bestPlane = p
+      }
+    }
+  }
+
+  buyPlane(id) {
+    if (clicks >= planes[id].price) {
+      clicks -= planes[id].price
+      planes[id].qty++
+      planes[id].price = Math.floor(planes[id].price * planePriceHike)
+      this.findBestPlane()
+      control.draw()
+    }
+  }
+
+  buyPilot() {
+    if (clicks >= pilots.price) {
+      clicks -= pilots.price
+      pilots.qty++
+      pilots.price = Math.floor(pilots.price * pilotPriceHike)
+      control.draw()
+    }
+  }
+
+  formatNum(num) {
+    if (num < 1000) {
+      return num
+    }
+    else if (num < 1000000) {
+      return Math.floor(num / 1000) + 'k'
+    }
+    else if (num < 1000000000) {
+      return Math.floor(num / 1000000) + 'M'
+    }
+    else {
+      return Math.floor(num / 1000000000) + 'G'
+    }
+  }
+}
+
+class Controller {
+  constructor() {
+    this.draw()
+  }
+
+  click() {
+    service.click()
+  }
+
+  reset() {
+    service.reset()
+  }
+
+  buyPilot() {
+    service.buyPilot()
+  }
+
+  buyPlane(id) {
+    service.buyPlane(id)
+  }
+
+  get getShopHtml() {
+    let html = ''
+    for (const p in planes) {
+      html += planes[p].shopHtml(p)
+    }
+    return html
+  }
+
+  draw() {
+    document.getElementById('clicker-card').innerHTML = planes[bestPlane].clickerHtml
+    document.getElementById('pilot-card').innerHTML = pilots.html
+    document.getElementById('shop-card').innerHTML = this.getShopHtml
+    document.getElementById('pax-total').innerText = clicks
+  }
+}
 
 let service = new Service
 let control = new Controller
@@ -256,5 +261,4 @@ function autoClick() {
   }
   control.draw()
 }
-
 setInterval(autoClick, 1000)
