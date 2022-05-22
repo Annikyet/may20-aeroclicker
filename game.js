@@ -134,7 +134,7 @@ let planes =  {
     )
 }
 const starterPlane = 'c150'
-const pilotPriceHike = 2
+const pilotPriceHike = 10
 const planePriceHike = 1.2
 let bestPlane = starterPlane
 let clicks = 0
