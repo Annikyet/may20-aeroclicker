@@ -1,12 +1,3 @@
-// planes increase pax/click
-// pilots increase clicks/s
-// prices increase with purchase
-
-// random fuel prices - flights cost fuel?
-// refactor into mvc-ish
-// make it purdy
-// refactor CSS
-
 class Plane {
   constructor(name, image, price, pax) {
     this.name = name
