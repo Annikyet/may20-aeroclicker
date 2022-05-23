@@ -227,6 +227,17 @@ class Controller {
     service.buyPlane(id)
   }
 
+  get clickStatsHtml() {
+    let cpc = 0
+    for (const p in planes) {
+      cpc += planes[p].clicks
+    }
+    return `
+    <span>${cpc} <i class="mdi mdi-ticket"></i> / Click</span>
+    <span>${cpc * pilots.qty} <i class="mdi mdi-ticket"></i> / Second</span>
+    `
+  }
+
   get getShopHtml() {
     let html = ''
     for (const p in planes) {
@@ -240,6 +251,7 @@ class Controller {
     document.getElementById('pilot-card').innerHTML = pilots.html
     document.getElementById('shop-card').innerHTML = this.getShopHtml
     document.getElementById('pax-total').innerText = clicks
+    document.getElementById('click-stats').innerHTML = this.clickStatsHtml
   }
 }
 
